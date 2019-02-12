@@ -1,0 +1,17 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": false,
+    "removeComments": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "lib": [
+      "es2015"
+    ],
+    "target": "es5"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

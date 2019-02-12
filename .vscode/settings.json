@@ -1,0 +1,8 @@
+{
+  "files.exclude": {
+    "dist/": true
+  },
+  "prettier.eslintIntegration": true,
+  "editor.formatOnSave": true,
+  "eslint.autoFixOnSave": true
+}

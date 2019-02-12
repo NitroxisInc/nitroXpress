@@ -1,0 +1,16 @@
+// define your variables here
+$primary: #eee;
+// @import "bootstrap/variables";
+@import "bootstrap/bootstrap";
+
+html,
+body {
+  background: $primary;
+}
+
+.page {
+  @extend .d-flex;
+  @extend .align-items-center;
+  @extend .justify-content-center;
+  min-height: 100vh;
+}
