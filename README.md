@@ -10,5 +10,5 @@
 
 ## TODOS
 
-[] add client side build script
-[] add build script
+* [ ] add client side build script
+* [ ] add build script
