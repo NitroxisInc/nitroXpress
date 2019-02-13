@@ -74,7 +74,7 @@ gulp.task("tsc", function tsc(done) {
       done()
       if (isServerRunning) {
         require("dotenv").config()
-        pm2.reload(pckg.name, async function() {
+        pm2.restart(pckg.name, async function() {
           browserSync.notify("RELOADING JS Files")
           await sleep(500)
           browserSync.reload()
@@ -175,6 +175,18 @@ gulp.task(
   )
 )
 
-process.on("exit", () => {
-  pm2.stop(pckg.name)
+process.once("SIGINT", function() {
+  console.log("Exitting Gulp...")
+  pm2.stop(pckg.name, function(err) {
+    if (err) return console.error(err)
+    console.log("closed pm2")
+    process.exit("SIGTERM")
+  })
+})
+
+process.once("SIGTERM", function() {
+  pm2.stop(pckg.name, function(err) {
+    if (err) return console.error(err)
+    console.log("closed pm2")
+  })
 })
