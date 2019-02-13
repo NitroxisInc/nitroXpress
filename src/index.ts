@@ -155,9 +155,9 @@ export class Server {
 
   startServer() {
     // kicking off: Server
-    // if (process.env.MODE === "development") {
-    let httpsPort = process.env.MODE !== "development" ? 443 : process.env.PORT || 42010
-    let httpPort = process.env.MODE !== "development" ? 80 : 8080
+    // if (process.env.NODE_ENV === "development") {
+    let httpsPort = process.env.NODE_ENV !== "development" ? 443 : process.env.PORT || 42010
+    let httpPort = process.env.NODE_ENV !== "development" ? 80 : 8080
     let httpServer = express()
     httpServer
       .get("*", function(req: express.Request, res: express.Response) {

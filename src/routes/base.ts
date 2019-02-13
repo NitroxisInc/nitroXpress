@@ -35,8 +35,14 @@ export default class BaseRouter {
       })
     })
 
-    MyRouter.use("/user", new (require("../controllers/user-controller")).Controller(this.Models).getRouter())
-    MyRouter.use("/", new (require("../controllers/common-controller")).Controller(this.Models).getRouter())
+    MyRouter.use(
+      "/user",
+      new (require("../controllers/user-controller")).Controller(this.Models).getRouter()
+    )
+    MyRouter.use(
+      "/",
+      new (require("../controllers/common-controller")).Controller(this.Models).getRouter()
+    )
 
     App.use("/", MyRouter)
     return App

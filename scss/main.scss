@@ -1,5 +1,5 @@
 // define your variables here
-$primary: #eee;
+$primary: #ddd;
 // @import "bootstrap/variables";
 @import "bootstrap/bootstrap";
 
@@ -9,8 +9,5 @@ body {
 }
 
 .page {
-  @extend .d-flex;
-  @extend .align-items-center;
-  @extend .justify-content-center;
   min-height: 100vh;
 }

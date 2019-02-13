@@ -64,6 +64,7 @@
     "node-sass": "^4.11.0",
     "npm-run-all": "^4.1.5",
     "pm2": "^3.2.9",
-    "typescript": "^3.3.3"
+    "typescript": "^3.3.3",
+    "webpack": "^4.29.3"
   }
 }
