@@ -15,13 +15,13 @@ It have the following preconfigured libraries and tools:
    1. Gulp 4
    2. Sass
    3. PM2
-   4. Browser-Sync – for auto reloading even when the server code is changed
+   4. browser-sync – for auto reloading even when the server code is changed
 
 ## How to Install from Server
 
 ```bash
-git clone git@github.com:NitroxisInc/nitroXpress.git
-cd nitroXpressnpm
+git clone git@github.com:NitroxisInc/nitroXpress.git PROJECTNAME
+cd PROJECTNAME
 npm install
 #  or
 yarn install
