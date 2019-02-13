@@ -21,7 +21,7 @@ const flatMap = require("lodash/flatMap")
 // utils functions
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 const isProduction = () => process.env.NODE_ENV === "production"
-const serializeEnv = obj => flatMap(obj, (v, k) => `${k.toString()}=${v.toString()}`)
+const serializeEnv = obj => flatMap(obj, (v, k) => `${k.toString()}="${v.toString()}"`)
 // const replaceEnv = (obj, name, val) => {}
 
 let isServerRunning = false
@@ -112,7 +112,7 @@ async function startBrowserSync() {
     {
       ui: false,
       port: 3000,
-      proxy: "https://localhost:42010"
+      proxy: `https://localhost:${parsed.PORT || 8080}`
     },
     noop
   )
@@ -123,8 +123,6 @@ gulp.task("server", function() {
   pm2.connect(true, function() {
     pm2.start(
       {
-        exec_mode: "cluster",
-        instances: 4,
         name: pckg.name,
         script: "dist/index.js",
         env: parsed
@@ -166,14 +164,17 @@ gulp.task(
     "sass",
     "clientjs",
     d => {
+      fs.mkdirSync(path.join(__dirname, "build"))
       gulp.src(["dist/**"]).pipe(gulp.dest("./build/server"))
       gulp.src(["public/**"]).pipe(gulp.dest("./build/public"))
-      gulp
-        .src([".env"])
-        .pipe(changeEnvToDev("production"))
-        .pipe(gulp.dest("./build"))
-      process.env.NODE_ENV = "development"
+      parsed.NODE_ENV = "production"
+      fs.writeFileSync(path.join(__dirname, "./build/.env"), serializeEnv(parsed).join("\n"))
+      require("dotenv").config()
       d()
     }
   )
 )
+
+process.on("exit", () => {
+  pm2.stop(pckg.name)
+})
