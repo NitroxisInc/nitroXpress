@@ -51,7 +51,14 @@ export class Server {
       exphbs({
         defaultLayout: "main",
         layoutsDir: path.join(__dirname, "../views/layouts"),
-        extname: ".hbs"
+        extname: ".hbs",
+        helpers: function(Handlebars) {
+          return {
+            encodeMyString: function(inputData) {
+              return Handlebars.SafeString(inputData)
+            }
+          }
+        }
       })
     )
     this.app.set("view engine", "hbs")
@@ -106,12 +113,17 @@ export class Server {
 
   loadDb() {
     mongoose.plugin(uniqueValidator)
+    mongoose.set("useNewUrlParser", true)
+    mongoose.set("useFindAndModify", false)
+    mongoose.set("useCreateIndex", true)
     mongoose.connect(
       process.env.DB_CONNECTION_STRING,
       {
         // autoIndex: process.env.NODE_ENV === 'dev',
         dbName: process.env.DB_NAME || "nitrodb",
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        autoIndex: true,
+        useCreateIndex: true
       } as any,
       err => {
         if (err) {
@@ -156,32 +168,33 @@ export class Server {
   startServer() {
     // kicking off: Server
     // if (process.env.NODE_ENV === "development") {
-    let httpsPort = process.env.NODE_ENV !== "development" ? 443 : process.env.PORT || 42010
-    let httpPort = process.env.NODE_ENV !== "development" ? 80 : 8080
-    let httpServer = express()
-    httpServer
-      .get("*", function(req: express.Request, res: express.Response) {
-        res.redirect("https://localhost:" + httpsPort + req.url)
+    if (process.env.NODE_ENV === "development") {
+      let httpsPort = process.env.NODE_ENV !== "development" ? 443 : process.env.PORT || 42010
+      let httpPort = process.env.NODE_ENV !== "development" ? 80 : 8080
+      let httpServer = express()
+      httpServer
+        .get("*", function(req: express.Request, res: express.Response) {
+          res.redirect("https://localhost:" + httpsPort + req.url)
+        })
+        .listen(httpPort)
+
+      // setting up https server
+      const privateKey = fs.readFileSync(path.resolve(__dirname, "../localhost.key")).toString()
+      const certificate = fs.readFileSync(path.resolve(__dirname, "../localhost.crt")).toString()
+      const credentials: https.ServerOptions = {
+        key: privateKey,
+        cert: certificate,
+        passphrase: "123456",
+        rejectUnauthorized: true
+      }
+
+      https.createServer(credentials, this.app).listen(httpsPort, async function() {
+        log.info(`Server started at https://localhost:${httpsPort}`)
       })
-      .listen(httpPort)
-
-    // setting up https server
-    const privateKey = fs.readFileSync(path.resolve(__dirname, "../localhost.key")).toString()
-    const certificate = fs.readFileSync(path.resolve(__dirname, "../localhost.crt")).toString()
-    const credentials: https.ServerOptions = {
-      key: privateKey,
-      cert: certificate,
-      passphrase: "123456",
-      rejectUnauthorized: true
+    } else {
+      // default port for the server
+      this.app.listen(process.env.PORT)
     }
-
-    https.createServer(credentials, this.app).listen(httpsPort, async function() {
-      log.info(`Server started at https://localhost:${httpsPort}`)
-    })
-    // } else {
-    // default port for the server
-    // this.app.listen(8020)
-    // }
   }
 }
 try {
