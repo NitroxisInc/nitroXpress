@@ -21,7 +21,8 @@ const flatMap = require("lodash/flatMap")
 // utils functions
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 const isProduction = () => process.env.NODE_ENV === "production"
-const serializeEnv = obj => flatMap(obj, (v, k) => `${k.toString()}="${v.toString()}"`)
+const serializeEnv = obj =>
+  flatMap(obj, (v, k) => `${k.toString()}="${v.toString()}"`)
 // const replaceEnv = (obj, name, val) => {}
 
 let isServerRunning = false
@@ -30,7 +31,10 @@ gulpSass.compiler = require("node-sass")
 
 gulp.task("clean", function clean() {
   return gulp
-    .src(["./public/css", "./public/js", "./build", "./dist"], { read: false, allowEmpty: true })
+    .src(["./public/css", "./public/js", "./dist"], {
+      read: false,
+      allowEmpty: true
+    })
     .pipe(gulpClean())
 })
 const webpackConfig = {
@@ -38,6 +42,14 @@ const webpackConfig = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "public/js/")
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        loader: ["style-loader", "css-loader"]
+      }
+    ]
   }
 }
 gulp.task("clientjs", function(done) {
@@ -74,7 +86,7 @@ gulp.task("tsc", function tsc(done) {
       done()
       if (isServerRunning) {
         require("dotenv").config()
-        pm2.restart(pckg.name, async function() {
+        pm2.reload(pckg.name, async function() {
           browserSync.notify("RELOADING JS Files")
           await sleep(500)
           browserSync.reload()
@@ -92,7 +104,7 @@ gulp.task("watchClient", function() {
 
 gulp.task("watchHbs", function() {
   gulp.watch("./views/**/*.hbs").on("change", function() {
-    pm2.restart(pckg.name, async function() {
+    pm2.reload(pckg.name, async function() {
       browserSync.notify("RELOADING Hbs")
       await sleep(500)
       browserSync.reload()
@@ -159,19 +171,9 @@ gulp.task(
       d()
     },
     "clean",
-    "renew-salt",
     "tsc",
     "sass",
-    "clientjs",
-    d => {
-      fs.mkdirSync(path.join(__dirname, "build"))
-      gulp.src(["dist/**"]).pipe(gulp.dest("./build/server"))
-      gulp.src(["public/**"]).pipe(gulp.dest("./build/public"))
-      parsed.NODE_ENV = "production"
-      fs.writeFileSync(path.join(__dirname, "./build/.env"), serializeEnv(parsed).join("\n"))
-      require("dotenv").config()
-      d()
-    }
+    "clientjs"
   )
 )
 
