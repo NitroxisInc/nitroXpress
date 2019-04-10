@@ -1,92 +1,71 @@
 import * as express from "express"
 import * as _ from "lodash"
-import * as mongoose from "mongoose"
-import { Roles } from "../models/user"
-import { IModels } from "../models/models"
-import { authorizeByRole } from "../core/authorization"
-import { GenerateResp, Reason } from "../core/common-errors"
 import * as asyncHandler from "express-async-handler"
-import sendMail from "../core/mail"
-import axios from "axios"
+import { hashPassword, encrypt } from "../core/common"
+import myLanguage from "../language"
+import * as csurf from "csurf"
+import UserModel, { Roles } from "../models/user"
+import { body, validationResult } from "express-validator/check"
+import { authorizeByRoleElseRedirect, signJwt, ifLoggedInThenRedirect } from "../core/authorization"
 
 require("dotenv").config()
 // import * as mongoose from 'mongoose'
 
 export class Controller {
-  private models: IModels
-  private Platform: mongoose.Model<any>
-  private Geo: mongoose.Model<any>
-
-  constructor(Models: IModels) {
-    // do nothing
-    this.models = Models
-    this.Platform = this.models.PlatformModel
-  }
-
   getRouter(): express.Router {
     const router: express.Router = express.Router()
+    const csrfProtection = csurf({ cookie: true })
 
-    router.get("/platform", this.getPlatformSettings) // get plaform settings
-
-    router.put("/platform", authorizeByRole(Roles.admin), this.updatePlatformSettings) // update the platform settings from admin panel
-    router.post("/contact-us", this.contactUs)
+    router.get("/", ifLoggedInThenRedirect("/dashboard"), csrfProtection, this.login)
+    router.post("/do-login", csrfProtection, ...this.doLogin)
+    router.get("/dashboard", csrfProtection, authorizeByRoleElseRedirect("/", Roles.admin), (req, res) => {
+      res.send(req.session)
+    })
 
     return router
   }
 
-  //#region Controller Functions
-  contactUs = asyncHandler(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // contact-us
-    const validateToken = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_KEY || "NOKEY"}&response=${req.body.captchatoken}`)
-
-    log.info(req.body)
-    log.info(validateToken.data)
-
-    if (validateToken.data.success) {
-      sendMail(
-        "test@nitroxis.com",
-        `Contact Submission from ${req.body.name}`,
-        `
-        <h1>Contact Us Form Submission From</h1>
-        <br><br>
-        Email: ${req.body.email}<br>
-        Name: ${req.body.name}<br>
-        Message:<br>${req.body.message}
-      `
-      )
-      res.send("OK")
-    } else {
-      res.sendStatus(403)
-    }
-  })
-
-  getPlatformSettings = asyncHandler(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    let platform = await this.Platform.findOne({}, "-_id -id")
-    res.json(GenerateResp(platform, Reason.success))
-  })
-
-  updatePlatformSettings = asyncHandler(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    let objToUpdate: any = {}
-
-    if (req.body["privacy-policy-link"]) objToUpdate["privacy-policy-link"] = req.body["privacy-policy-link"]
-    if (req.body["terms-link"]) objToUpdate["terms-link"] = req.body["terms-link"]
-    if (req.body.slides) objToUpdate.slides = req.body.slides
-
-    this.Platform.findOneAndUpdate({}, objToUpdate, {
-      new: true,
-      upsert: true
+  login = asyncHandler(async function(req: express.Request, res: express.Response) {
+    res.render("login", {
+      layout: "plain",
+      // _session: JSON.stringify({ ...req.session }),
+      csrfToken: req.csrfToken()
     })
-      .then(resp => {
-        if (resp) {
-          return res.send(GenerateResp(resp, Reason.updated))
-        }
-        return res.status(400).send(GenerateResp("Can't get the Platform Record", Reason.dbError))
-      })
-      .catch(err => {
-        log.error(err)
-        return res.status(400).send(GenerateResp(err, Reason.dbError))
-      })
   })
+
+  //#region Controller Functions
+
+  doLogin = [
+    [body("email", myLanguage.invalidEmail).isEmail(), body("password", myLanguage.invalidPassword)],
+    asyncHandler(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      // POST do-login
+      try {
+        const userObj = await UserModel.findOne({
+          mobile: req.body.mobile,
+          password: hashPassword(req.body.password)
+        }).select("-password")
+
+        if (!userObj) throw myLanguage.wrongUserCredentials
+
+        req.session.user = { ...userObj.toJSON() }
+        console.log(req.session.user)
+
+        req.session.messages = [...(req.session.messages || []), myLanguage.successfullyLoggedin]
+        req.session.token = signJwt({
+          _b: userObj._id,
+          _a: encrypt(hashPassword(req.body.password))
+        })
+        req.session.save(() => {
+          res.redirect("/dashboard")
+        })
+      } catch (e) {
+        req.session.errors = [...(req.session.errors || []), myLanguage.wrongUserCredentials]
+        req.session.save(() => {
+          res.redirect("/")
+        })
+      }
+    })
+  ]
 
   //#endregion
 }
