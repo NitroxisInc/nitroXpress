@@ -1,5 +1,5 @@
 import * as nodemailer from "nodemailer"
-const myApp = require("../../package.json")
+require("dotenv").config()
 
 const smtpConfig = {
   host: "smtp.gmail.com",
@@ -11,8 +11,8 @@ const smtpConfig = {
   },
   secure: true, // use SSL
   auth: {
-    user: "hammad@nitroxis.com",
-    pass: "jpgzxhzgpqpvdgyh"
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
   }
 }
 
@@ -23,21 +23,23 @@ const transport = nodemailer.createTransport({
 
 const gmailTransport = nodemailer.createTransport(smtpConfig)
 
-export const sendMail = function(to: string, subject: string, html: string) {
-
-  gmailTransport.sendMail({
-    replyTo: "info@isvmarket.com",
-    from: `noreply-${myApp.name}@isvmarket.com`,
-    to,
-    subject: `ISV Market :: ${subject}`,
-    html
-  }, (err, info) => {
-    if (err) {
-      log.error(err)
+export const sendMail = function(to: string, subject: string, html: string, attachments = []) {
+  gmailTransport.sendMail(
+    {
+      replyTo: `noreply-${process.env.ADMIN_EMAIL}`,
+      from: `${process.env.ADMIN_EMAIL}`,
+      to,
+      subject: `${process.env.APP_NAME} :: ${subject}`,
+      html,
+      attachments
+    },
+    (err, info) => {
+      if (err) {
+        log.error(err)
+      }
+      return info
     }
-    return info
-  })
-
+  )
 }
 
 export default sendMail
