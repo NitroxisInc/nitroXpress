@@ -1,6 +1,5 @@
 import { IResponseError } from "../interfaces"
-import { isArrayLikeObject, size } from "lodash"
-import { isString, isObject, isArray } from "util"
+import { size, isArray, isObject, isString } from "lodash"
 
 export enum Reason {
   // db errors
@@ -40,13 +39,13 @@ export enum StatusCode {
   badRequest = 400,
   auth = 401,
   forbidden = 403,
-  server = 500,
+  server = 500
 }
 
 const $default = {
   message: "undefined",
   why: Reason[Reason.unknown],
-  field: "none",
+  field: "none"
 }
 
 export const AuthError: IResponseError = {
@@ -68,19 +67,17 @@ export const GenerateResp = (message: any, reason: Reason, field?): IResponseErr
     count: 0,
     field
   }
-  
+
   if (isObject(message) || isArray(message)) {
     ro.msg = "#data"
-    ; (ro as IResponseError).data = message
+    ;(ro as IResponseError).data = message
   }
 
   if (isArray(message)) {
     ro.count = size(message)
-  }
-  else {
+  } else {
     delete ro.count
   }
 
   return ro
-  
 }

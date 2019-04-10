@@ -17,15 +17,16 @@ let slideSchema = new Schema({
   }
 })
 
-let mySchema = new Schema({
-  createdAt: {
-    default: Date.now,
-    type: Date,
+let mySchema = new Schema(
+  {
+    slides: [slideSchema],
+    privacyPolicyLink: String,
+    termsLink: String
   },
-  slides: [slideSchema],
-  privacyPolicyLink: String,
-  termsLink: String
-})
+  {
+    timestamps: true
+  }
+)
 
 mySchema.plugin(require("mongoose-unique-validator"))
 mySchema.plugin(mongooseSanitize)

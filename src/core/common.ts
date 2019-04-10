@@ -5,13 +5,6 @@ import * as path from "path"
 import { fileURLToPath } from "url"
 require("dotenv").config()
 
-const pathToLocalhostKey = path.join(__dirname, "../..", "/localhost.key")
-
-let privateFile = null
-if (fs.existsSync(pathToLocalhostKey)) {
-  privateFile = fs.readFileSync(pathToLocalhostKey, { encoding: "utf8" })
-}
-
 export function capitalizeWords(val): string {
   return _.startCase(_.capitalize(val))
 }
@@ -26,14 +19,14 @@ export function removeSpace(value: string) {
 
 export function encrypt(obj): string {
   const text = JSON.stringify(obj) || ""
-  const cipher = crypto.createCipher("aes-256-ctr", privateFile)
+  const cipher = crypto.createCipher("aes-256-ctr", process.env.SECRET)
   let crypted = cipher.update(text, "utf8", "hex")
   crypted += cipher.final("hex")
   return crypted
 }
 
 export function decrypt(text: string): string {
-  const decipher = crypto.createDecipher("aes-256-ctr", privateFile)
+  const decipher = crypto.createDecipher("aes-256-ctr", process.env.SECRET)
   let dec = decipher.update(text, "hex", "utf8")
   dec += decipher.final("utf8")
   // let text = ''
@@ -48,11 +41,11 @@ export function decrypt(text: string): string {
 
 // return the hashed value of given value
 export function hashPassword(value: string): string {
-  return !!value
+  return value
     ? crypto
-        .createHmac("sha512", privateFile)
-        .update(value, "utf8")
-        .digest("hex")
+      .createHmac("sha512", process.env.SECRET)
+      .update(value, "utf8")
+      .digest("hex")
     : void 0
 }
 
@@ -65,7 +58,7 @@ export function generateToken(value: string = null): string {
 }
 
 export function randPassword(length: number = 10): string {
-  const uniqVal = new Date().getMilliseconds() + privateFile + new Date().getTime()
+  const uniqVal = new Date().getMilliseconds() + process.env.SECRET + new Date().getTime()
   const generatedHash: string[] = crypto
     .createHash("sha256")
     .update(uniqVal.toString(), "utf8")

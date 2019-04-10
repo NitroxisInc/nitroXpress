@@ -8,14 +8,17 @@ export default {
   imageFilter(req, file, cb) {
     // accept image only
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        return cb(new Error(`Only image files are allowed!`), false)
+      return cb(new Error("Only image files are allowed!"), false)
     }
     cb(null, true)
   },
   documentFilter(req, file, cb) {
     // accept all types of accepted documents
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif|doc|docx|pages|rtf|pdf|xls|xlsx)$/)) {
-        return cb(new Error("Only jpg, jpeg, png, gif, doc, docx, pages, rtf, pdf, xls or xlsx files are allowed!"), false)
+      return cb(
+        new Error("Only jpg, jpeg, png, gif, doc, docx, pages, rtf, pdf, xls or xlsx files are allowed!"),
+        false
+      )
     }
     cb(null, true)
   }

@@ -14,36 +14,43 @@ export enum Roles {
 }
 export const RolesAll = [Roles.admin, Roles.normalUser, Roles.paidUser]
 
-let mySchema = new Schema({
-  createdAt: {
-    default: Date.now,
-    type: Date
+let mySchema = new Schema(
+  {
+    email: {
+      required: "Email is required",
+      index: true,
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      dropDups: true
+    },
+    // use this for saving any additional information for the user
+    profile: mongoose.Schema.Types.Mixed,
+    name: String,
+    password: {
+      required: "Password is required",
+      type: String,
+      trim: true
+    },
+    type: {
+      type: String,
+      enum: convertEnumToStringArray(Roles),
+      required: "A valid user type is required"
+    },
+    registeredAt: {
+      type: Date,
+      default: Date.now
+    },
+    resetToken: {
+      select: false,
+      type: String
+    }
   },
-  email: {
-    required: "Email is required",
-    index: true,
-    type: String,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    dropDups: true
-  },
-  name: String,
-  password: {
-    required: "Password is required",
-    type: String,
-    trim: true
-  },
-  type: {
-    type: String,
-    enum: convertEnumToStringArray(Roles),
-    required: "A valid user type is required"
-  },
-  resetToken: {
-    select: false,
-    type: String
+  {
+    timestamps: true
   }
-})
+)
 
 mySchema.plugin(require("mongoose-unique-validator"))
 mySchema.plugin(mongooseSanitize, { skip: ["profile"] })

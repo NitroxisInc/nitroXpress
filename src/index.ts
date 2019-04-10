@@ -5,7 +5,7 @@ import * as morgan from "morgan"
 import * as mongoose from "mongoose"
 import * as jwt from "jsonwebtoken"
 import * as methodOverride from "method-override"
-import { IModels, Models } from "./models/models"
+
 import BaseRouter from "./routes/base"
 import { GenerateResp, Reason } from "./core/common-errors"
 import * as fs from "fs"
@@ -17,16 +17,17 @@ import * as path from "path"
 import * as mime from "mime"
 import * as exphbs from "express-handlebars"
 import ntxErrorHandler from "./core/error-handler"
-// const browserSync = require("browser-sync").has("hammad") ? require("browser-sync").get("hammad") : require("browser-sync").create("hammad")
+import * as cookieParser from "cookie-parser"
+import * as expressSession from "express-session"
+const MongoDBStore = require("connect-mongodb-session")(expressSession)
+
 // const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 // import
-import "source-map-support/register"
+require("source-map-support").install()
 
 export class Server {
   public app: express.Application
-
-  private User: mongoose.Model<any>
-  private _models: IModels
 
   constructor() {
     this.app = express()
@@ -35,9 +36,7 @@ export class Server {
     this.load3rdPartyMiddlewares()
     this.loadDb()
 
-    this._models = Models as IModels
-
-    this.loadRoutes(this.app, this._models)
+    this.loadRoutes(this.app)
     this.setUpErrorHandler(this.app)
   }
 
@@ -46,16 +45,27 @@ export class Server {
     require("dotenv").config()
     this.app.set("superSecret", process.env.SECRET)
     this.app.set("views", path.join(__dirname, "../views"))
+
     this.app.engine(
       "hbs",
       exphbs({
         defaultLayout: "main",
         layoutsDir: path.join(__dirname, "../views/layouts"),
         extname: ".hbs",
-        helpers: function(Handlebars) {
-          return {
-            encodeMyString: function(inputData) {
-              return Handlebars.SafeString(inputData)
+        helpers: {
+          equal(lvalue, rvalue, options) {
+            if (arguments.length < 3) throw new Error("Handlebars Helper equal needs 2 parameters")
+            if (lvalue != rvalue) {
+              return options.inverse(this)
+            } else {
+              return options.fn(this)
+            }
+          },
+          if_even(conditional, options) {
+            if (conditional % 2 == 0) {
+              return options.inverse(this)
+            } else {
+              return options.fn(this)
             }
           }
         }
@@ -70,14 +80,30 @@ export class Server {
   load3rdPartyMiddlewares() {
     // allow for X-HTTP-METHOD-OVERRIDE header
     this.app.use(methodOverride())
+    // express flash setup
+    this.app.use(cookieParser(process.env.SECRET))
+    const store = new MongoDBStore({
+      uri: process.env.DB_CONNECTION_STRING,
+      databaseName: process.env.DB_NAME || "nitrodb",
+      collection: "sessions"
+    })
+    this.app.use(
+      expressSession({
+        cookie: { maxAge: 60000 },
+        saveUninitialized: true,
+        store,
+        resave: true,
+        secret: process.env.SECRET
+      })
+    )
 
     // use body parser so we can get info from POST and/or URL parameters
-
     this.app.use(bodyParser.urlencoded({ extended: false }))
     this.app.use(
       bodyParser.json({
         limit: "10MB",
         verify(req, res, buf) {
+          // hack for github to convert all json body in json
           if (req.url.toLowerCase().includes("webhook")) {
             (req as any).rawBody = buf.toString()
           }
@@ -124,12 +150,16 @@ export class Server {
         useNewUrlParser: true,
         autoIndex: true,
         useCreateIndex: true
-      } as any,
+      },
       err => {
         if (err) {
           log.error(err)
           this.gracefulExit()
           // this.loadDb()
+        }
+        if (process.env.NODE_ENV == "development") {
+          // here we're running bootstrap DB scrips
+          require("./core/bootstrap-db").default()
         }
         log.info("connected to the server")
       }
@@ -144,12 +174,9 @@ export class Server {
     })
   }
 
-  loadRoutes(app: express.Application, _models: IModels) {
-    const baseRouter = new BaseRouter(app, _models)
-    app = baseRouter.initApp()
-
+  loadRoutes(app: express.Application) {
     app.use(
-      "/",
+      "/public",
       express.static(__dirname + "/../public", {
         setHeaders(res, path) {
           log.info(path)
@@ -157,9 +184,13 @@ export class Server {
         }
       })
     )
+
+    app = new BaseRouter(app).initApp()
+
     app.use("/", (req, res, next) => {
       res.header("Content-type", "text/html")
       res.status(404).render("404", {
+        layout: "plain",
         reqUrl: req.originalUrl
       })
     })
@@ -167,7 +198,6 @@ export class Server {
 
   startServer() {
     // kicking off: Server
-    // if (process.env.NODE_ENV === "development") {
     if (process.env.NODE_ENV === "development") {
       let httpsPort = process.env.NODE_ENV !== "development" ? 443 : process.env.PORT || 42010
       let httpPort = process.env.NODE_ENV !== "development" ? 80 : 8080
