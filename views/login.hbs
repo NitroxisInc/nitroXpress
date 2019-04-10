@@ -1,0 +1,66 @@
+<div class="page-register">
+  <section class="form w-50 mx-auto">
+
+    <div class="d-flex justify-content-center align-items-center">
+      <form class="ion-form login-form w-100" action="/do-login" method="POST" novalidate>
+        <div class="form-group">
+          <h2>Login to Dashboard</h2>
+        </div>
+        {{#if errors}}
+        {{#each errors}}
+        <div class="alert alert-danger d-flex justify-content-between align-items-center">
+          <span>{{this}}</span>
+          <a data-dismiss="alert" class="btn btn-light">Close</a>
+        </div>
+        {{/each}}
+        {{/if}}
+        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+        <pre>{{{_session}}}</pre>
+        <div class="form-group">
+          <label for="">Email Address <color style="color: red;">*</color></label>
+          <input type="text" name="email" required="true" value="admin@test.com" class="email-input form-control">
+        </div>
+        <div class="form-group">
+          <label for="">Password <color style="color: red;">*</color></label>
+          <input type="password" required="true" name="password" value="12345678" class="form-control">
+        </div>
+        <hr>
+        <div class="d-flex justify-content-end align-items-center">
+          <button type="submit" id="loginbtn" class="btn btn-primary">Login</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    const loginForm = document.querySelector(".login-form")
+    let loginValidationRules = {
+      email: val =>
+        /.+\@.+\..+/.test(val) ? true : "Not a valid email address",
+      password: val => (!val || val.length < 8 ? "Enter password of min. length of 8 to continue" : true)
+    }
+    loginForm.onsubmit = function (ev) {
+      ev.preventDefault()
+      resetForm()
+      registerErrors = validate(loginForm, loginValidationRules)
+      if (loginForm.isValid) {
+        // alert("Success")
+        $(".login-form").attr("action", "/do-login")
+        return loginForm.submit()
+      }
+
+      for (let error in registerErrors) {
+        let spanError = $("<span />")
+          .text(registerErrors[error])
+          .addClass("text-danger")
+        $(`[name=${error}]`, loginForm)
+          .addClass("border-danger")
+          .after(spanError)
+        // .siblings("label")
+        // .addClass("text-danger")
+      }
+      return true
+    }
+  </script>
+
+</div>
