@@ -18,6 +18,8 @@
       "error",
       2
     ],
+    "key-spacing": "error",
+    "keyword-spacing": "error",
     "no-multiple-empty-lines": [
       "error",
       {
@@ -25,6 +27,10 @@
         "maxEOF": 1
       }
     ],
+    "switch-colon-spacing": "error",
+    "no-whitespace-before-property": "error",
+    "space-infix-ops": "error",
+    "no-trailing-spaces": "error",
     "space-before-function-paren": "error",
     "space-in-parens": "error",
     "array-bracket-newline": "error",
