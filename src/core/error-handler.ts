@@ -22,7 +22,7 @@ export default (err, req, res, next) => {
     if (err.toString().match(new RegExp("@")) !== null) {
       [, reason] = err.match(reasonRegex)
     }
-    
+
     if (err.toString().match(new RegExp("#")) !== null) {
       const [, statusCoded] = err.match(codeRegex)
       err = err.replace(codeRegex, "")

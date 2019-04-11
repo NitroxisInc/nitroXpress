@@ -18,6 +18,8 @@
       "error",
       2
     ],
+    "computed-property-spacing": "error",
+    "arrow-spacing": "error",
     "key-spacing": "error",
     "keyword-spacing": "error",
     "no-multiple-empty-lines": [
