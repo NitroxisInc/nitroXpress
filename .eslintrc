@@ -1,0 +1,89 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module"
+  },
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/indent": [
+      "error",
+      2
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1,
+        "maxEOF": 1
+      }
+    ],
+    "space-before-function-paren": "error",
+    "space-in-parens": "error",
+    "array-bracket-newline": "error",
+    "camelcase": "error",
+    "array-bracket-spacing": "error",
+    "arrow-parens": "error",
+    "array-element-newline": [
+      "error",
+      "always"
+    ],
+    "vars-on-top": "error",
+    "prefer-const": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "no-lonely-if": "error",
+    "no-useless-rename": "error",
+    "no-useless-concat": "error",
+    "no-useless-return": "error",
+    "no-var": "error",
+    "semi": [
+      "error",
+      "never"
+    ],
+    "one-var": [
+      "error",
+      "never"
+    ],
+    "block-scoped-var": "error",
+    "object-curly-spacing": "error",
+    "object-property-newline": [
+      "error",
+      {
+        "allowAllPropertiesOnSameLine": false
+      }
+    ],
+    "object-curly-newline": "error",
+    "no-bitwise": "error",
+    "require-await": "error",
+    "quote-props": "error",
+    "sort-vars": "error",
+    "wrap-iife": "error",
+    "func-call-spacing": [
+      "error",
+      "never"
+    ],
+    "eol-last": "error",
+    "dot-notation": "error",
+    "dot-location": [
+      "error",
+      "property"
+    ],
+    "valid-jsdoc": "warn",
+    "newline-per-chained-call": "error",
+    "curly": [
+      "error",
+      "all"
+    ],
+    "lines-between-class-members": "error",
+    "comma-spacing": "error",
+    "quotes": [
+      "error",
+      "double",
+      "avoid-escape"
+    ]
+  }
+}
