@@ -2,22 +2,22 @@ import * as crypto from "crypto"
 import * as _ from "lodash"
 import * as fs from "fs"
 import * as path from "path"
-import { fileURLToPath } from "url"
+import {fileURLToPath} from "url"
 require("dotenv").config()
 
-export function capitalizeWords(val): string {
+export function capitalizeWords (val): string {
   return _.startCase(_.capitalize(val))
 }
 
-export function convertEnumToStringArray(Enum: any): string[] {
-  return Object.keys(Enum).filter(elem => !_.parseInt(elem) && elem !== "0")
+export function convertEnumToStringArray (Enum: any): string[] {
+  return Object.keys(Enum).filter((elem) => !_.parseInt(elem) && elem !== "0")
 }
 
-export function removeSpace(value: string) {
+export function removeSpace (value: string) {
   return _.replace(value, /\W/gi, "")
 }
 
-export function encrypt(obj): string {
+export function encrypt (obj): string {
   const text = JSON.stringify(obj) || ""
   const cipher = crypto.createCipher("aes-256-ctr", process.env.SECRET)
   let crypted = cipher.update(text, "utf8", "hex")
@@ -25,7 +25,7 @@ export function encrypt(obj): string {
   return crypted
 }
 
-export function decrypt(text: string): string {
+export function decrypt (text: string): string {
   const decipher = crypto.createDecipher("aes-256-ctr", process.env.SECRET)
   let dec = decipher.update(text, "hex", "utf8")
   dec += decipher.final("utf8")
@@ -40,7 +40,7 @@ export function decrypt(text: string): string {
 }
 
 // return the hashed value of given value
-export function hashPassword(value: string): string {
+export function hashPassword (value: string): string {
   return value
     ? crypto
       .createHmac("sha512", process.env.SECRET)
@@ -49,7 +49,7 @@ export function hashPassword(value: string): string {
     : void 0
 }
 
-export function generateToken(value: string = null): string {
+export function generateToken (value: string = null): string {
   const uniqVal = !value ? new Date().toString() : value
   return crypto
     .createHash("sha256")
@@ -57,7 +57,7 @@ export function generateToken(value: string = null): string {
     .digest("hex")
 }
 
-export function randPassword(length: number = 10): string {
+export function randPassword (length: number = 10): string {
   const uniqVal = new Date().getMilliseconds() + process.env.SECRET + new Date().getTime()
   const generatedHash: string[] = crypto
     .createHash("sha256")

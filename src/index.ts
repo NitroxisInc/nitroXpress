@@ -7,7 +7,7 @@ import * as jwt from "jsonwebtoken"
 import * as methodOverride from "method-override"
 
 import BaseRouter from "./routes/base"
-import { GenerateResp, Reason } from "./core/common-errors"
+import {GenerateResp, Reason} from "./core/common-errors"
 import * as fs from "fs"
 import * as https from "https"
 import * as http from "http"
@@ -29,7 +29,7 @@ require("source-map-support").install()
 export class Server {
   public app: express.Application
 
-  constructor() {
+  constructor () {
     this.app = express()
     this.loadConfig()
 
@@ -40,7 +40,7 @@ export class Server {
     this.setUpErrorHandler(this.app)
   }
 
-  loadConfig() {
+  loadConfig () {
     // support for .env files
     require("dotenv").config()
     this.app.set("superSecret", process.env.SECRET)
@@ -53,15 +53,15 @@ export class Server {
         layoutsDir: path.join(__dirname, "../views/layouts"),
         extname: ".hbs",
         helpers: {
-          equal(lvalue, rvalue, options) {
-            if (arguments.length < 3) throw new Error("Handlebars Helper equal needs 2 parameters")
+          equal (lvalue, rvalue, options) {
+            if (arguments.length < 3) {throw new Error("Handlebars Helper equal needs 2 parameters")}
             if (lvalue != rvalue) {
               return options.inverse(this)
             } else {
               return options.fn(this)
             }
           },
-          if_even(conditional, options) {
+          ifEven (conditional, options) {
             if (conditional % 2 == 0) {
               return options.inverse(this)
             } else {
@@ -77,7 +77,7 @@ export class Server {
     this.app.set("trust proxy", "loopback")
   }
 
-  load3rdPartyMiddlewares() {
+  load3rdPartyMiddlewares () {
     // allow for X-HTTP-METHOD-OVERRIDE header
     this.app.use(methodOverride())
     // express flash setup
@@ -89,7 +89,7 @@ export class Server {
     })
     this.app.use(
       expressSession({
-        cookie: { maxAge: 60000 },
+        cookie: {maxAge: 60000},
         saveUninitialized: true,
         store,
         resave: true,
@@ -98,11 +98,11 @@ export class Server {
     )
 
     // use body parser so we can get info from POST and/or URL parameters
-    this.app.use(bodyParser.urlencoded({ extended: false }))
+    this.app.use(bodyParser.urlencoded({extended: false}))
     this.app.use(
       bodyParser.json({
         limit: "10MB",
-        verify(req, res, buf) {
+        verify (req, res, buf) {
           // hack for github to convert all json body in json
           if (req.url.toLowerCase().includes("webhook")) {
             (req as any).rawBody = buf.toString()
@@ -116,7 +116,7 @@ export class Server {
     this.app.use(this.setOwnHeader)
   }
 
-  setUpErrorHandler(app: express.Application) {
+  setUpErrorHandler (app: express.Application) {
     if (process.env.NODE_ENV === "dev") {
       // error Handler
       app.use(morgan("dev"))
@@ -124,7 +124,7 @@ export class Server {
     app.use(ntxErrorHandler)
   }
 
-  setOwnHeader(req: express.Request, res: express.Response, next: express.NextFunction) {
+  setOwnHeader (req: express.Request, res: express.Response, next: express.NextFunction) {
     res.header("Server", "NitroNode")
     res.header("X-Powered-By", "NitroNode")
     res.setTimeout(_.parseInt(process.env.TIMEOUT || "20000"), () => {
@@ -137,7 +137,7 @@ export class Server {
     next()
   }
 
-  loadDb() {
+  loadDb () {
     mongoose.plugin(uniqueValidator)
     mongoose.set("useNewUrlParser", true)
     mongoose.set("useFindAndModify", false)
@@ -151,7 +151,7 @@ export class Server {
         autoIndex: true,
         useCreateIndex: true
       },
-      err => {
+      (err) => {
         if (err) {
           log.error(err)
           this.gracefulExit()
@@ -167,18 +167,19 @@ export class Server {
     // If the Node process ends, close the Mongoose connection
     process.on("SIGINT", this.gracefulExit).on("SIGTERM", this.gracefulExit)
   }
-  gracefulExit() {
-    mongoose.connection.close(function() {
+
+  gracefulExit () {
+    mongoose.connection.close(function () {
       log.info("Mongoose default connection is disconnected through app termination")
       process.exit(0)
     })
   }
 
-  loadRoutes(app: express.Application) {
+  loadRoutes (app: express.Application) {
     app.use(
       "/public",
       express.static(__dirname + "/../public", {
-        setHeaders(res, path) {
+        setHeaders (res, path) {
           log.info(path)
           res.setHeader("content-type", mime.getType(path))
         }
@@ -196,14 +197,14 @@ export class Server {
     })
   }
 
-  startServer() {
+  startServer () {
     // kicking off: Server
     if (process.env.NODE_ENV === "development") {
-      let httpsPort = process.env.NODE_ENV !== "development" ? 443 : process.env.PORT || 42010
-      let httpPort = process.env.NODE_ENV !== "development" ? 80 : 8080
-      let httpServer = express()
+      const httpsPort = process.env.NODE_ENV !== "development" ? 443 : process.env.PORT || 42010
+      const httpPort = process.env.NODE_ENV !== "development" ? 80 : 8080
+      const httpServer = express()
       httpServer
-        .get("*", function(req: express.Request, res: express.Response) {
+        .get("*", function (req: express.Request, res: express.Response) {
           res.redirect("https://localhost:" + httpsPort + req.url)
         })
         .listen(httpPort)
@@ -218,7 +219,7 @@ export class Server {
         rejectUnauthorized: true
       }
 
-      https.createServer(credentials, this.app).listen(httpsPort, async function() {
+      https.createServer(credentials, this.app).listen(httpsPort, function () {
         log.info(`Server started at https://localhost:${httpsPort}`)
       })
     } else {
@@ -228,8 +229,7 @@ export class Server {
   }
 }
 try {
-  global.log = log
-  let server = new Server()
+  const server = new Server()
   server.startServer()
 } catch (exception) {
   log.error(exception)

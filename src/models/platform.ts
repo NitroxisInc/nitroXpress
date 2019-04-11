@@ -6,7 +6,7 @@ import mongooseSanitize from "../core/sanitize-schema"
 const Schema = mongoose.Schema
 const ObjectId = mongoose.Types.ObjectId
 
-let slideSchema = new Schema({
+const slideSchema = new Schema({
   img: {
     type: String,
     required: "Img path is required"
@@ -17,7 +17,7 @@ let slideSchema = new Schema({
   }
 })
 
-let mySchema = new Schema(
+const mySchema = new Schema(
   {
     slides: [slideSchema],
     privacyPolicyLink: String,
@@ -32,7 +32,7 @@ mySchema.plugin(require("mongoose-unique-validator"))
 mySchema.plugin(mongooseSanitize)
 mySchema.plugin(idValidator)
 mySchema.plugin(autopopulate)
-mySchema.set("toObject", { getters: true })
-mySchema.set("toJSON", { getters: true })
+mySchema.set("toObject", {getters: true})
+mySchema.set("toJSON", {getters: true})
 
 export default mongoose.model("Platform", mySchema, "platform")

@@ -1,9 +1,8 @@
-// tslint:disable:no-console
 import chalk from "chalk"
 import * as _ from "lodash"
 
-const stringify = (args) => {
-  return _.map(args, arg => {
+const stringify = (args: any[]) => {
+  return _.map(args, (arg) => {
     if (_.isObject(arg)) {
       return require("util").inspect(arg, {showHidden: true})
     }
@@ -12,28 +11,26 @@ const stringify = (args) => {
 }
 
 export default {
-  error: (...args): void => {
-    // let g = stringify(args)
+  error: (...args: any): void => {
     console.log(chalk.bgRed.white(
-      // require('util').inspect(stringify(args))
       stringify(args)
     ))
   },
-  info: (...args): void => {
+  info: (...args: any): void => {
     console.log(chalk.bgBlue.white(
       stringify(args)
     ))
   },
-  warn: (...args): void => {
+  warn: (...args: any): void => {
     console.log(chalk.bgYellow.white(
-        stringify(args)
+      stringify(args)
       // require('util').inspect()
     ))
   },
-  debug: (...args): void => {
+  debug: (...args: any): void => {
     console.log(chalk.bgBlack.white(
-        stringify(args)
+      stringify(args)
       // require('util').inspect(stringify(args))
     ))
   }
-} as ILog
+}

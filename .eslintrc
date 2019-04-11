@@ -1,15 +1,19 @@
 {
   "parser": "@typescript-eslint/parser",
-  "extends": [
-    "plugin:@typescript-eslint/recommended"
+  "plugins": [
+    "@typescript-eslint"
   ],
   "parserOptions": {
     "ecmaVersion": 2017,
     "sourceType": "module"
   },
   "rules": {
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/array-type": "error",
+    "@typescript-eslint/camelcase": "error",
+    "@typescript-eslint/class-name-casing": "error",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/type-annotation-spacing": "error",
+    "@typescript-eslint/no-array-constructor": "error",
     "@typescript-eslint/indent": [
       "error",
       2
@@ -59,7 +63,10 @@
     "object-curly-newline": "error",
     "no-bitwise": "error",
     "require-await": "error",
-    "quote-props": "error",
+    "quote-props": [
+      "error",
+      "as-needed"
+    ],
     "sort-vars": "error",
     "wrap-iife": "error",
     "func-call-spacing": [
@@ -72,7 +79,6 @@
       "error",
       "property"
     ],
-    "valid-jsdoc": "warn",
     "newline-per-chained-call": "error",
     "curly": [
       "error",

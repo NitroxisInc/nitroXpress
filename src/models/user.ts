@@ -2,7 +2,7 @@ import * as mongoose from "mongoose"
 import * as idValidator from "mongoose-id-validator"
 import * as autopopulate from "mongoose-autopopulate"
 import mongooseSanitize from "../core/sanitize-schema"
-import { convertEnumToStringArray } from "../core/common"
+import {convertEnumToStringArray} from "../core/common"
 
 const Schema = mongoose.Schema
 const ObjectId = mongoose.Types.ObjectId
@@ -12,9 +12,13 @@ export enum Roles {
   normalUser = "normalUser",
   paidUser = "paidUser"
 }
-export const RolesAll = [Roles.admin, Roles.normalUser, Roles.paidUser]
+export const RolesAll = [
+  Roles.admin,
+  Roles.normalUser,
+  Roles.paidUser
+]
 
-let mySchema = new Schema(
+const mySchema = new Schema(
   {
     email: {
       required: "Email is required",
@@ -53,10 +57,10 @@ let mySchema = new Schema(
 )
 
 mySchema.plugin(require("mongoose-unique-validator"))
-mySchema.plugin(mongooseSanitize, { skip: ["profile"] })
+mySchema.plugin(mongooseSanitize, {skip: ["profile"]})
 mySchema.plugin(idValidator)
 mySchema.plugin(autopopulate)
-mySchema.set("toObject", { getters: true })
-mySchema.set("toJSON", { getters: true })
+mySchema.set("toObject", {getters: true})
+mySchema.set("toJSON", {getters: true})
 
 export default mongoose.model("User", mySchema)

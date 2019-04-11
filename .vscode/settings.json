@@ -2,7 +2,13 @@
   "files.exclude": {
     "dist/": true
   },
-  "prettier.eslintIntegration": true,
-  "editor.formatOnSave": true,
-  "eslint.autoFixOnSave": true
+  "eslint.autoFixOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    {
+      "language": "typescript",
+      "autoFix": true
+    }
+  ],
+  "editor.formatOnSave": true
 }

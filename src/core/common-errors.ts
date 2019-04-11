@@ -1,5 +1,5 @@
-import { IResponseError } from "../interfaces"
-import { size, isArray, isObject, isString } from "lodash"
+import {IResponseError} from "../interfaces"
+import {size, isArray, isObject, isString} from "lodash"
 
 export enum Reason {
   // db errors
@@ -61,7 +61,7 @@ export const DBConnectionError: IResponseError = {
 }
 
 export const GenerateResp = (message: any, reason: Reason, field?): IResponseError => {
-  let ro: IResponseError = {
+  const ro: IResponseError = {
     why: reason,
     msg: message,
     count: 0,

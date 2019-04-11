@@ -23,7 +23,7 @@ const transport = nodemailer.createTransport({
 
 const gmailTransport = nodemailer.createTransport(smtpConfig)
 
-export const sendMail = function(to: string, subject: string, html: string, attachments = []) {
+export const sendMail = function (to: string, subject: string, html: string, attachments = []) {
   gmailTransport.sendMail(
     {
       replyTo: `noreply-${process.env.ADMIN_EMAIL}`,

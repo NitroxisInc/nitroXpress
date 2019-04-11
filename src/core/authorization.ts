@@ -1,13 +1,11 @@
 import * as express from "express"
-import * as mongoose from "mongoose"
-import UserModel, { Roles } from "../models/user"
-import { decrypt, convertEnumToStringArray } from "../core/common"
+import UserModel, {Roles} from "../models/user"
+import {decrypt} from "../core/common"
 import * as _ from "lodash"
 import * as jwt from "jsonwebtoken"
-import * as fs from "fs"
-import * as path from "path"
+import log from "../log"
 import myLanguage from "../language"
-import { AuthError, Reason, GenerateResp, StatusCode } from "../core/common-errors"
+import {Reason, GenerateResp, StatusCode} from "../core/common-errors"
 
 const privateFile = process.env.SECRET
 
@@ -17,41 +15,41 @@ declare global {
   namespace Express {
     interface Request {
       user: {
-        _id: string
-        email: string
-        token?: string
-        profile?: any
-        type?: Roles
-      }
+        _id: string;
+        email: string;
+        token?: string;
+        profile?: any;
+        type?: Roles;
+      };
     }
   }
 }
 
-export function signJwt(objToSign: object, expiresIn: string | null = null) {
+export function signJwt (objToSign: object, expiresIn: string | null = null) {
   const jwtOptions: any = {
     algorithm: algo
   }
 
-  if (expiresIn) jwtOptions.expiresIn = expiresIn
+  if (expiresIn) {jwtOptions.expiresIn = expiresIn}
   return jwt.sign(objToSign, privateFile, jwtOptions)
 }
 
-export function ifLoggedInThenRedirect(elsePath: string = "/") {
+export function ifLoggedInThenRedirect (elsePath: string = "/") {
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (!req.session.token) {
       next()
-    } else res.redirect(elsePath)
+    } else {res.redirect(elsePath)}
   }
 }
 
-export function authorizeByRoleElseRedirect(failurePath: string, ...rolesEnum: Roles[]) {
+export function authorizeByRoleElseRedirect (failurePath: string, ...rolesEnum: Roles[]) {
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     let token: string = req.header("Authorization") || req.session.token || req.body.token || req.query.token || ""
     token = typeof token !== "undefined" && token.length > 0 ? token.trim() : token
-    let roles: string[] = []
+    const roles: string[] = []
     if (token) {
       // valid type of authorization is provided
-      jwt.verify(token, privateFile, { algorithms: [algo] }, (err, _doc: any) => {
+      jwt.verify(token, privateFile, {algorithms: [algo]}, (err, _doc: any) => {
         if (err) {
           req.session.errors = (req.session.errors || []).concat(err.message || err).concat(err.message || err)
           return req.session.save(() => {
@@ -59,7 +57,7 @@ export function authorizeByRoleElseRedirect(failurePath: string, ...rolesEnum: R
           })
         }
 
-        _.each(rolesEnum, e => {
+        _.each(rolesEnum, (e) => {
           roles.push(Roles[e])
         })
 
@@ -68,7 +66,7 @@ export function authorizeByRoleElseRedirect(failurePath: string, ...rolesEnum: R
           UserModel.findOne({
             _id: _doc._b,
             password: decrypt(_doc._a),
-            type: { $in: roles }
+            type: {$in: roles}
           })
             .then((userObj: any) => {
               if (userObj) {
@@ -87,8 +85,10 @@ export function authorizeByRoleElseRedirect(failurePath: string, ...rolesEnum: R
                 // }
 
                 if (_.hasIn(userObj, "profile")) {
-                  req.user = { ...req.user, _id: userObj._id, type: userObj.type }
-                  req.user.profile = userObj["profile"] || {}
+                  req.user = {...req.user,
+                    _id: userObj._id,
+                    type: userObj.type}
+                  req.user.profile = userObj.profile || {}
                 }
                 next()
               } else {
@@ -99,7 +99,7 @@ export function authorizeByRoleElseRedirect(failurePath: string, ...rolesEnum: R
                 })
               }
             })
-            .catch(err => {
+            .catch((err) => {
               log.error(err)
               req.session.errors = (req.session.errors || []).concat(myLanguage.dbConnection)
               return req.session.save(() => {
@@ -124,18 +124,19 @@ export function authorizeByRoleElseRedirect(failurePath: string, ...rolesEnum: R
     }
   }
 }
+
 /**
  * middleware to validate the jsonWebToken
  * only supporting token string to be present in jwt token
  */
-export function authorizeByRoleElseStatus(...rolesEnum: Roles[]) {
+export function authorizeByRoleElseStatus (...rolesEnum: Roles[]) {
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     let token: string = req.header("Authorization") || req.body.token || req.query.token || ""
     token = typeof token !== "undefined" && token.length > 0 ? token.trim() : token
-    let roles: string[] = []
+    const roles: string[] = []
     if (token) {
       // valid type of authorization is provided
-      jwt.verify(token, privateFile, { algorithms: [algo] }, (err, _doc: any) => {
+      jwt.verify(token, privateFile, {algorithms: [algo]}, (err, _doc: any) => {
         if (err) {
           if (err.name === "TokenExpiredError") {
             return res.status(StatusCode.auth).json(GenerateResp(err, Reason.authCodeExpired))
@@ -143,7 +144,7 @@ export function authorizeByRoleElseStatus(...rolesEnum: Roles[]) {
           return res.status(StatusCode.auth).json(GenerateResp(err, Reason.invalidAuthCode))
         }
         // allRoles = convertEnumToStringArray(Roles)
-        _.each(rolesEnum, e => {
+        _.each(rolesEnum, (e) => {
           roles.push(Roles[e])
         })
 
@@ -152,7 +153,7 @@ export function authorizeByRoleElseStatus(...rolesEnum: Roles[]) {
           UserModel.findOne({
             _id: _doc._b,
             password: decrypt(_doc._a),
-            type: { $in: roles }
+            type: {$in: roles}
           })
             .then((userObj: any) => {
               if (userObj) {
@@ -169,7 +170,7 @@ export function authorizeByRoleElseStatus(...rolesEnum: Roles[]) {
                 }
 
                 if (_.hasIn(userObj, "profile")) {
-                  req.user = userObj["profile"] || {}
+                  req.user = userObj.profile || {}
                   req.user._id = userObj._id
                   req.user.type = userObj.type
                 }
@@ -178,7 +179,7 @@ export function authorizeByRoleElseStatus(...rolesEnum: Roles[]) {
                 return res.status(401).json(GenerateResp("No User Found with the given detail", Reason.invalidAuthCode))
               }
             })
-            .catch(err => {
+            .catch((err) => {
               log.error(err)
               return res.status(401).json(GenerateResp(err || err.message, Reason.dbError))
             })

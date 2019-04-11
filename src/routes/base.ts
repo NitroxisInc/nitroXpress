@@ -4,7 +4,7 @@ import * as cors from "cors"
 export default class BaseRouter {
   private App: express.Application
 
-  constructor(App: express.Application) {
+  constructor (App: express.Application) {
     this.App = App
   }
 
@@ -22,7 +22,8 @@ export default class BaseRouter {
       next()
     })
 
-    MyRouter.use("/", new (require("../controllers/common-controller")).Controller().getRouter())
+    MyRouter.use("/", new (require("../controllers/common-controller")).Controller()
+      .getRouter())
 
     // use cors for api requests
     // MyRouter.use("/api", cors(), new (require("../controllers/admin-controller")).Controller().getRouter())

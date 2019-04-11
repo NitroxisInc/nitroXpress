@@ -1,6 +1,6 @@
-import UserModel, { Roles } from "../models/user"
+import UserModel, {Roles} from "../models/user"
 
-export default async function() {
+export default async function () {
   if (!(await UserModel.findOne())) {
     // await UserModel.deleteMany({})
     new UserModel({

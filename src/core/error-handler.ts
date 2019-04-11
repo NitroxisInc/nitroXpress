@@ -1,17 +1,17 @@
-import { GenerateResp, Reason, StatusCode } from "./common-errors"
-import { parseInt as asInt } from "lodash"
-import { Response } from "express"
+import {GenerateResp, Reason, StatusCode} from "./common-errors"
+import {parseInt as asInt} from "lodash"
+import {Response} from "express"
 
 export default (err, req, res, next) => {
-  let finalMsg = ""
+  const finalMsg = ""
   let finalField = null
   let reason = null
   let statusCode = 400
 
-  let codeRegex = new RegExp("#([^\\s]+)")
-  let reasonRegex = new RegExp("@([^\\s]+)")
-  let fieldRegex = new RegExp("'([^']+)'")
-  let consecutiveSpaces = new RegExp("[\\s]{2,}")
+  const codeRegex = new RegExp("#([^\\s]+)")
+  const reasonRegex = new RegExp("@([^\\s]+)")
+  const fieldRegex = new RegExp("'([^']+)'")
+  const consecutiveSpaces = new RegExp("[\\s]{2,}")
 
   if (typeof err === "string") {
     // finalMsg
@@ -24,7 +24,7 @@ export default (err, req, res, next) => {
     }
     
     if (err.toString().match(new RegExp("#")) !== null) {
-      let [, statusCoded] = err.match(codeRegex)
+      const [, statusCoded] = err.match(codeRegex)
       err = err.replace(codeRegex, "")
       statusCode = asInt(statusCoded)
     }

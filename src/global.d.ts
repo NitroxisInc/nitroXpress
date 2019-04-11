@@ -1,3 +1,4 @@
+/* eslint-disable */
 declare namespace NodeJS {
   export interface Global {
     log: ILog
