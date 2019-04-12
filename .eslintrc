@@ -18,6 +18,7 @@
       "error",
       2
     ],
+    "comma-dangle": "error",
     "computed-property-spacing": "error",
     "arrow-spacing": "error",
     "key-spacing": "error",
@@ -35,13 +36,20 @@
     "no-trailing-spaces": "error",
     "space-before-function-paren": "error",
     "space-in-parens": "error",
-    "array-bracket-newline": "error",
+    "array-bracket-newline": [
+      "error",
+      {
+        "minItems": 2
+      }
+    ],
     "camelcase": "error",
     "array-bracket-spacing": "error",
     "arrow-parens": "error",
     "array-element-newline": [
       "error",
-      "always"
+      {
+        "minItems": 2
+      }
     ],
     "vars-on-top": "error",
     "prefer-const": "error",
